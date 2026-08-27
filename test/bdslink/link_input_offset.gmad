@@ -1,0 +1,8 @@
+probe: rcol, l=0.1*m, material="G4_Fe", xsize=5*cm, ysize=5*cm,
+       aper1=4*cm;
+
+link_line: line = (probe);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="g4FTFP_BERT";

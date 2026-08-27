@@ -98,3 +98,39 @@ G4bool BDSLinkRegistry::NoRotation(G4int ID) const
   else
     {throw BDSException(__METHOD_NAME__, "unknown link element ID " + std::to_string(ID));}
 }
+
+G4double BDSLinkRegistry::InputTrackingOffset(const std::string& name) const
+{
+  auto search = byName.find(name);
+  if (search != byName.end())
+    {return search->second.component->InputTrackingOffset();}
+  else
+    {throw BDSException(__METHOD_NAME__, "unknown link element name \"" + name + "\"");}
+}
+
+G4double BDSLinkRegistry::InputTrackingOffset(G4int ID) const
+{
+  auto search = byID.find(ID);
+  if (search != byID.end())
+    {return search->second.component->InputTrackingOffset();}
+  else
+    {throw BDSException(__METHOD_NAME__, "unknown link element ID " + std::to_string(ID));}
+}
+
+G4double BDSLinkRegistry::OutputTrackingOffset(const std::string& name) const
+{
+  auto search = byName.find(name);
+  if (search != byName.end())
+    {return search->second.component->OutputTrackingOffset();}
+  else
+    {throw BDSException(__METHOD_NAME__, "unknown link element name \"" + name + "\"");}
+}
+
+G4double BDSLinkRegistry::OutputTrackingOffset(G4int ID) const
+{
+  auto search = byID.find(ID);
+  if (search != byID.end())
+    {return search->second.component->OutputTrackingOffset();}
+  else
+    {throw BDSException(__METHOD_NAME__, "unknown link element ID " + std::to_string(ID));}
+}

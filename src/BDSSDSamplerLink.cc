@@ -35,7 +35,9 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "CLHEP/Geometry/Point3D.h"
 #include "CLHEP/Geometry/Vector3D.h"
+#include "CLHEP/Units/PhysicalConstants.h"
 
+#include <cmath>
 #include <vector>
 
 BDSSDSamplerLink::BDSSDSamplerLink(const G4String& name):
@@ -125,6 +127,19 @@ G4bool BDSSDSamplerLink::ProcessHits(G4Step* aStep, G4TouchableHistory* /*readOu
     {
       localPosition  = pos + globalToLocalOffset;
       localDirection = mom;
+
+      const G4double outputTrackingOffset = registry ? registry->OutputTrackingOffset(samplerID) : 0;
+      if (outputTrackingOffset > 0 && std::abs(localDirection.z()) > 0)
+        {
+          localPosition.setX(localPosition.x() - outputTrackingOffset *
+                             localDirection.x() / localDirection.z());
+          localPosition.setY(localPosition.y() - outputTrackingOffset *
+                             localDirection.y() / localDirection.z());
+          localPosition.setZ(localPosition.z() - outputTrackingOffset);
+          const G4double beta = momentum / energy;
+          if (beta > 0)
+            {T -= outputTrackingOffset / (beta * CLHEP::c_light * localDirection.z());}
+        }
     }
   else if (globalToLocal != G4Transform3D::Identity)
     {

@@ -53,12 +53,18 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 
 BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponentIn,
 				   BDSTiltOffset* tiltOffsetIn,
-				   G4double outputSamplerRadiusIn):
+				   G4double outputSamplerRadiusIn,
+				   G4double inputTrackingOffsetIn):
   BDSGeometryComponent(nullptr, nullptr),
   component(acceleratorComponentIn),
   outputSamplerRadius(outputSamplerRadiusIn),
+  inputTrackingOffset(inputTrackingOffsetIn),
+  outputTrackingOffset(2.5 * BDSSamplerCustom::ChordLength()),
   sampler(nullptr)
 {
+  if (inputTrackingOffset < 0)
+    {throw BDSException(__METHOD_NAME__, "link input tracking offset must be non-negative");}
+
   if (tiltOffsetIn->HasFiniteTilt() && BDS::IsFinite(component->GetAngle()))
     {throw BDSException(__METHOD_NAME__, "finite tilt with angled component unsupported.");}
 
@@ -173,6 +179,8 @@ G4int BDSLinkOpaqueBox::PlaceOutputSampler()
   sampler->GetContainerLogicalVolume()->SetSensitiveDetector(BDSSDManager::Instance()->SamplerLink());
   sampler->MakeMaterialValidForUseInMassWorld();
   auto z2 = component->GetExtent();
+  // Keep the sampler clear of the component. Hits are recorded on its downstream
+  // surface; BDSLink backtracks them by outputTrackingOffset before returning them.
   G4ThreeVector position = G4ThreeVector(0,0,0.5*component->GetChordLength() + 2*BDSSamplerCustom::ChordLength());
   G4RotationMatrix* rm = nullptr;
   if (BDS::IsFinite(component->GetAngle()))

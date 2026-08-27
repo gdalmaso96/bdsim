@@ -39,9 +39,12 @@ class BDSSamplerCustom;
 class BDSLinkOpaqueBox: public BDSGeometryComponent
 {
 public:
+  /// inputTrackingOffsetIn is the distance upstream of the nominal input plane
+  /// where particles are injected into Geant4.
   BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponentIn,
                    BDSTiltOffset* tiltOffsetIn,
-                   G4double outputSamplerRadiusIn);
+                   G4double outputSamplerRadiusIn,
+                   G4double inputTrackingOffsetIn);
   virtual ~BDSLinkOpaqueBox();
 
   /// Default constructor
@@ -63,11 +66,15 @@ public:
   G4double ChordLength() const {return component ? component->GetChordLength() : 0.0;}
   G4bool   Angled()      const {return component ? BDS::IsFinite(component->GetAngle()) : false;}
   G4String LinkName()    const {return component ? component->GetName() : "unknown";}
+  G4double InputTrackingOffset() const {return inputTrackingOffset;}
+  G4double OutputTrackingOffset() const {return outputTrackingOffset;}
   /// @}
 
 private:
   BDSAcceleratorComponent* component;
   G4double                 outputSamplerRadius;
+  G4double                 inputTrackingOffset;
+  G4double                 outputTrackingOffset;
   G4ThreeVector            offsetToStart;
   G4Transform3D            transformToStart;
   BDSSamplerCustom*        sampler;

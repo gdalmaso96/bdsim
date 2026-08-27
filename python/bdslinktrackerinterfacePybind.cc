@@ -33,7 +33,6 @@ namespace py = pybind11;
 #include "BDSLinkTrackerInterface.hh"
 #include "BDSIMLink.hh"
 #include "BDSLinkBunch.hh"
-#include "BDSSamplerCustom.hh"
 #include "BDSParser.hh"
 
 
@@ -358,10 +357,8 @@ void TrackXSuite(BDSLinkTrackerInterface *tracker_interface,
             double dp = (hit->momentum / mratio - ref->Momentum()) / ref->Momentum();
 
             double collLength = link->GetArcLengthOfLinkElement(iElement);
-            /// Need to compensate for the geometry construction in BDSIM
-            /// There is a safety margin that is added to the collimator legnth
-            double collMargin = 2.5 * BDSSamplerCustom::ChordLength();
-            double zt = ref->Beta() * CLHEP::c_light * ((collLength + collMargin) / (CLHEP::c_light * ref->Beta()) - coords.T);
+            double zt = ref->Beta() * CLHEP::c_light *
+                        (collLength / (CLHEP::c_light * ref->Beta()) - coords.T);
             double oneplusdelta = (1 + dp) * mratio;
 
             auto track_id = hit->externalParticleID;

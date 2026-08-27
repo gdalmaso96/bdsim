@@ -50,6 +50,14 @@ public:
   G4bool NoRotation(const std::string& name) const;
   G4bool NoRotation(G4int ID) const;
 
+  /// Distance used to backtrack a particle before injection into the selected element.
+  G4double InputTrackingOffset(const std::string& name) const;
+  G4double InputTrackingOffset(G4int ID) const;
+
+  /// Distance from the nominal output plane to the link sampler hit plane.
+  G4double OutputTrackingOffset(const std::string& name) const;
+  G4double OutputTrackingOffset(G4int ID) const;
+
 private:
 
   struct LinkEntry
