@@ -1,0 +1,10 @@
+test_field: field, type="dipole", fieldParameters="field=1.2 by=1";
+
+probe: rcol, l=0.5*m, material="G4_Fe", xsize=4*cm, ysize=4*cm,
+       aper1=10*cm, fieldAll="test_field";
+
+link_line: line = (probe);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="g4FTFP_BERT";
