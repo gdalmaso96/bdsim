@@ -74,7 +74,7 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
   G4double mx = extent.MaximumX();
   G4double my = extent.MaximumY();
   G4double mr = std::max({mx, my, outputSamplerRadius});
-  G4double mz = extent.MaximumZ();
+  G4double mz = std::max(extent.MaximumZ(), 0.5*component->GetChordLength());
   G4Box* terminatorBoxOuter = new G4Box(name + "_terminator_box_outer_solid",
 					mr + gap + opaqueBoxThickness,
 					mr + gap + opaqueBoxThickness,
@@ -138,13 +138,18 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
   G4Transform3D* placementTransform = new G4Transform3D(*rm, of);
   delete rm;
 
-  new G4PVPlacement(*placementTransform,
-		    component->GetContainerLogicalVolume(),
-		    component->GetName() + "_pv",
-		    containerLogicalVolume,
-		    false,
-		    1,
-		    true);
+  // A gap has length but intentionally builds no geometry. The link container
+  // still provides the vacuum tracking region and output sampler for it.
+  if (component->GetContainerLogicalVolume())
+    {
+      new G4PVPlacement(*placementTransform,
+			component->GetContainerLogicalVolume(),
+			component->GetName() + "_pv",
+			containerLogicalVolume,
+			false,
+			1,
+			true);
+    }
   
   outerExtent = BDSExtent(xsize, ysize, zsize);
 

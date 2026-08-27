@@ -123,6 +123,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                            GMAD::ElementType::_BMCOL,
 						   GMAD::ElementType::_JCOL,
 						   GMAD::ElementType::_CRYSTALCOL,
+						   GMAD::ElementType::_DRIFT,
+						   GMAD::ElementType::_GAP,
 						   GMAD::ElementType::_ELEMENT};
       auto search = acceptedTypes.find(eType);
       if (search == acceptedTypes.end())
@@ -139,6 +141,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                                             element.tilt * CLHEP::rad);
       auto extentTiltOffset = component->GetExtent().TiltOffset(to);
       G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
+      if (encompassingRadius <= 0)
+        {encompassingRadius = 0.5 * globalConstants->SamplerDiameter();}
       BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component, to, encompassingRadius);
       
       delete to; // opaqueBox doesn't own it

@@ -1,0 +1,8 @@
+d1: drift, l=0.5*m, aper1=5*cm;
+g1: gap, l=0.5*m;
+
+link_line: line = (d1, g1);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="g4FTFP_BERT";
