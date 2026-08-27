@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 {
   if (argc != 4)
     {
-      std::cerr << "Usage: BDSLinkStraightElementTester <gmad-file> <element-name> <transport>" << std::endl;
+      std::cerr << "Usage: BDSLinkStraightElementTester <gmad-file> <element-name> <transport|field>" << std::endl;
       return 1;
     }
 
@@ -106,6 +106,18 @@ int main(int argc, char** argv)
                     << ": dx=" << dx/CLHEP::mm << " mm"
                     << ", dy=" << dy/CLHEP::mm << " mm"
                     << ", xp=" << hit->coords.xp
+                    << ", yp=" << hit->coords.yp << std::endl;
+          return 1;
+        }
+    }
+  else if (check == "field")
+    {
+      const G4double deltaDirection = std::hypot(hit->coords.xp - xp0,
+                                                 hit->coords.yp - yp0);
+      if (deltaDirection < 1e-8)
+        {
+          std::cerr << "No measurable field deflection through " << elementName
+                    << ": xp=" << hit->coords.xp
                     << ", yp=" << hit->coords.yp << std::endl;
           return 1;
         }

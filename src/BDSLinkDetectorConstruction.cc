@@ -123,6 +123,11 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                            GMAD::ElementType::_BMCOL,
 						   GMAD::ElementType::_JCOL,
 						   GMAD::ElementType::_CRYSTALCOL,
+						   GMAD::ElementType::_QUAD,
+						   GMAD::ElementType::_SEXTUPOLE,
+						   GMAD::ElementType::_OCTUPOLE,
+						   GMAD::ElementType::_DECAPOLE,
+						   GMAD::ElementType::_MULT,
 						   GMAD::ElementType::_DRIFT,
 						   GMAD::ElementType::_GAP,
 						   GMAD::ElementType::_ELEMENT};

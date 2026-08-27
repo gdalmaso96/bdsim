@@ -62,6 +62,10 @@ add_test(NAME "tester-link-straight-drift"
          COMMAND BDSLinkStraightElementTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_straight_elements.gmad d1 transport)
 add_test(NAME "tester-link-straight-gap"
          COMMAND BDSLinkStraightElementTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_straight_elements.gmad g1 transport)
+foreach(element_name q1 s1 o1 dc1 mul1)
+  add_test(NAME "tester-link-straight-${element_name}"
+           COMMAND BDSLinkStraightElementTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_straight_elements.gmad ${element_name} field)
+endforeach()
 
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
