@@ -260,10 +260,10 @@ The main interface is the class :code:`BDSIMLink` that is used in place of
 :code:`BDSIM` (from `BDSIMClass.hh`). It is recommended to look through the
 header for the interface. It uses a simplified geometry construction
 of BDSIM with Geant4 user actions defined in classes that begin with :code:`BDSLink*`.
-The interface was written (currently) only for collimators with the minimal interface
-required. The initial implementation is made for SixTrack and is perhaps not ideal. The output
-writing is broken and the CMake option :code:`USE_SIXTRACK_LINK=ON` should be used.
+The interface was written initially for collimators with the minimal interface
+required. The initial implementation was made for SixTrack and is perhaps not ideal.
 
-* Only passive (i.e. with no fields) components can be used.
+* Field definitions assigned to supported components are constructed and applied during
+  linked tracking.
 * A bunch may be tracked through one element at once, breaking the usual loop
   of one particle through all beam line elements.

@@ -15,6 +15,12 @@ if you'd like to give us feedback or help in the development.  See :ref:`support
 v1.8.2 - 2026 / 11 / 12
 =======================
 
+New Features
+------------
+
+* Construct and attach field definitions assigned to components used through
+  :code:`BDSIMLink`.
+
 Bug Fixes
 ---------
 
