@@ -61,6 +61,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "G4Types.hh"
 #include "G4Version.hh"
 #include "G4VisAttributes.hh"
+#include "G4VSolid.hh"
 #if G4VERSION_NUMBER > 1039
 #include "G4ChannelingOptrMultiParticleChangeCrossSection.hh"
 #endif
@@ -193,6 +194,15 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                                             element.tilt * CLHEP::rad);
       auto extentTiltOffset = component->GetExtent().TiltOffset(to);
       G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
+      if (const auto* containerSolid = component->GetContainerSolid())
+        {
+          G4ThreeVector containerLow;
+          G4ThreeVector containerHigh;
+          containerSolid->BoundingLimits(containerLow, containerHigh);
+          const auto containerExtent = BDSExtent(containerLow, containerHigh).TiltOffset(to);
+          encompassingRadius = std::max(encompassingRadius,
+                                        containerExtent.MaximumAbsTransverse());
+        }
       if (encompassingRadius <= 0)
         {encompassingRadius = 0.5 * globalConstants->SamplerDiameter();}
       BDSAcceleratorComponent* inputGuard = nullptr;

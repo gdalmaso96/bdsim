@@ -115,6 +115,8 @@ function(add_link_native_element_test element_name length_m outcome)
            COMMAND BDSLinkNativeElementTester
                    ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_remaining_native_elements.gmad
                    ${element_name} ${length_m} ${outcome})
+  set_tests_properties("tester-link-native-${element_name}" PROPERTIES
+    FAIL_REGULAR_EXPRESSION "Overlap with mother volume")
 endfunction()
 add_link_native_element_test(target1      0.05 transport)
 add_link_native_element_test(dump1        0.2  absorbed)
