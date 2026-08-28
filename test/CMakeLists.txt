@@ -83,6 +83,10 @@ add_executable(BDSLinkComponentLineTester BDSLinkComponentLineTester.cc)
 target_link_libraries(BDSLinkComponentLineTester ${BDSIM_LIB_NAME} gmad)
 add_test(NAME "tester-link-component-line-rf"
          COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad rf1 energy)
+add_test(NAME "tester-link-component-line-rfx"
+         COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad rfx1 field-x)
+add_test(NAME "tester-link-component-line-rfy"
+         COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad rfy1 field-y)
 foreach(element_name sol1 hk1)
   add_test(NAME "tester-link-component-line-${element_name}"
            COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad ${element_name} field)

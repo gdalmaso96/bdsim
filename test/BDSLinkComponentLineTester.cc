@@ -24,7 +24,8 @@ int main(int argc, char** argv)
 {
   if (argc != 4)
     {
-      std::cerr << "Usage: BDSLinkComponentLineTester <gmad-file> <element-name> <energy|field>"
+      std::cerr << "Usage: BDSLinkComponentLineTester "
+                << "<gmad-file> <element-name> <energy|field|field-x|field-y>"
                 << std::endl;
       return 1;
     }
@@ -109,6 +110,24 @@ int main(int argc, char** argv)
           std::cerr << "No measurable field effect through " << elementName
                     << ": xp=" << hit->coords.xp
                     << ", yp=" << hit->coords.yp << std::endl;
+          return 1;
+        }
+    }
+  else if (check == "field-x")
+    {
+      if (std::abs(hit->coords.xp - xp0) < 1e-12)
+        {
+          std::cerr << "No horizontal RF kick through " << elementName
+                    << ": xp=" << hit->coords.xp << std::endl;
+          return 1;
+        }
+    }
+  else if (check == "field-y")
+    {
+      if (std::abs(hit->coords.yp) < 1e-12)
+        {
+          std::cerr << "No vertical RF kick through " << elementName
+                    << ": yp=" << hit->coords.yp << std::endl;
           return 1;
         }
     }
