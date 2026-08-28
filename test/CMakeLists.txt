@@ -5,6 +5,11 @@ if (USE_PYTHON_BINDINGS)
            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/elementtype_bindings.py)
   set_tests_properties("tester-python-element-type-bindings" PROPERTIES
                        ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/python")
+
+  add_test(NAME "tester-python-laser-bindings"
+           COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/laser_bindings.py)
+  set_tests_properties("tester-python-laser-bindings" PROPERTIES
+                       ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/python")
 endif()
 
 add_executable(BDSFieldTester BDSFieldTester.cc)
