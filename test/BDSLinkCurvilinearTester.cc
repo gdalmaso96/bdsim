@@ -79,13 +79,16 @@ int main(int argc, char** argv)
       return 1;
     }
 
-  // The pole-face geometry extends beyond the nominal reference planes. The
-  // link must track through that native envelope in addition to its usual
-  // navigation and sampler margins.
-  if (bend->InputTrackingOffset() <= BDSGlobalConstants::Instance()->LengthSafety() ||
+  // An ordinary BDSIM primary starts at the nominal entrance with only the
+  // standard safety backstep.  The input guard must enclose an angled face,
+  // but must not move the interface plane to the upstream end of that guard.
+  const G4double expectedInputOffset = BDSGlobalConstants::Instance()->LengthSafety();
+  if (std::abs(bend->InputTrackingOffset() - expectedInputOffset) > 1e-12 * CLHEP::mm ||
       bend->OutputTrackingOffset() <= 2.5 * BDSSamplerCustom::ChordLength())
     {
-      std::cerr << "The bend tracking offsets do not enclose its native geometry"
+      std::cerr << "The bend tracking offsets do not match its interface planes"
+                << " (input " << bend->InputTrackingOffset()
+                << ", expected " << expectedInputOffset << ")"
                 << std::endl;
       return 1;
     }

@@ -123,7 +123,6 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
       if (componentBeamline->size() == 0)
         {throw BDSException(__METHOD_NAME__, "empty internal link beamline");}
 
-      const BDSBeamlineElement* trackingFirst = componentBeamline->GetFirstItem();
       const BDSBeamlineElement* trackingLast  = componentBeamline->GetLastItem();
       const BDSBeamlineElement* nominalFirst = componentBeamline->at(nominalStartIndex);
       const BDSBeamlineElement* nominalLast  = componentBeamline->at(nominalEndIndex);
@@ -141,17 +140,14 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
                                       nominalFirst->GetReferencePositionStart());
       transformToOutput = G4Transform3D(*nominalLast->GetReferenceRotationEnd(),
                                        nominalLast->GetReferencePositionEnd());
-      const G4Transform3D trackingStart(
-        *trackingFirst->GetReferenceRotationStart(),
-        trackingFirst->GetReferencePositionStart());
       const G4Transform3D trackingOutput(
         *trackingLast->GetReferenceRotationEnd(),
         trackingLast->GetReferencePositionEnd());
-      const G4double inputGuardDistance =
-        -(transformToStart.inverse() * trackingStart).getTranslation().z();
       const G4double outputGuardDistance =
         (transformToOutput.inverse() * trackingOutput).getTranslation().z();
-      inputTrackingOffset += std::max(0.0, inputGuardDistance);
+      // Match ordinary BDSIM injection at the nominal reference entrance.
+      // The input guard encloses an angled face, but starting at the guard's
+      // upstream end would add an x-dependent path before the nominal plane.
       outputTrackingOffset += std::max(0.0, outputGuardDistance);
 
       const BDSExtentGlobal extentGlobal = componentBeamline->GetExtentGlobal();
