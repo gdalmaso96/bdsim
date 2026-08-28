@@ -22,9 +22,10 @@ This file is part of BDSIM.
 
 int main(int argc, char** argv)
 {
-  if (argc != 3)
+  if (argc != 3 && argc != 5)
     {
-      std::cerr << "Usage: BDSLinkFieldTester <gmad-file> <element-name>" << std::endl;
+      std::cerr << "Usage: BDSLinkFieldTester <gmad-file> <element-name> [expected-x expected-xp]"
+                << std::endl;
       return 1;
     }
 
@@ -86,6 +87,21 @@ int main(int argc, char** argv)
       std::cerr << "The field was not applied: xp=" << hit->coords.xp
                 << ", yp=" << hit->coords.yp << std::endl;
       return 1;
+    }
+
+  if (argc == 5)
+    {
+      const G4double expectedX  = std::stod(argv[3]) * CLHEP::m;
+      const G4double expectedXP = std::stod(argv[4]);
+      // The standalone reference is read from BDSIM's float sampler output.
+      if (std::abs(hit->coords.x - expectedX) > 10 * CLHEP::nm ||
+          std::abs(hit->coords.xp - expectedXP) > 1e-9)
+        {
+          std::cerr << "Field-map tracking differs from standalone BDSIM: x="
+                    << hit->coords.x / CLHEP::m << ", xp=" << hit->coords.xp
+                    << std::endl;
+          return 1;
+        }
     }
 
   return 0;
