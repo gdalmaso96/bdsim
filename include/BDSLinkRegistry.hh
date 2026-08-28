@@ -39,13 +39,14 @@ public:
   ~BDSLinkRegistry();
 
   G4int Register(BDSLinkOpaqueBox*    componentIn,
-		             const G4Transform3D& globalToInputIn);
+		             const G4Transform3D& inputToGlobalIn,
+		             const G4Transform3D& outputToGlobalIn);
 
-  const G4Transform3D& Transform(const std::string& name) const;
-  const G4Transform3D& Transform(G4int ID) const;
+  const G4Transform3D& InputToGlobal(const std::string& name) const;
+  const G4Transform3D& InputToGlobal(G4int ID) const;
 
-  const G4Transform3D& TransformInverse(const std::string& name) const;
-  const G4Transform3D& TransformInverse(G4int ID) const;
+  const G4Transform3D& GlobalToOutput(const std::string& name) const;
+  const G4Transform3D& GlobalToOutput(G4int ID) const;
 
   G4bool NoRotation(const std::string& name) const;
   G4bool NoRotation(G4int ID) const;
@@ -64,8 +65,8 @@ private:
   {
     G4bool            noRotation;  // true if component straight and no rotation is required
     BDSLinkOpaqueBox* component;
-    G4Transform3D     transform;
-    G4Transform3D     transformInverse;
+    G4Transform3D     inputToGlobal;
+    G4Transform3D     globalToOutput;
     G4int             id;
   };
 

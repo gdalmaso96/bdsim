@@ -565,12 +565,12 @@ G4int BDSLinkDetectorConstruction::PlaceOneComponent(const BDSBeamlineElement* e
     {return -1;}
   BDSLinkOpaqueBox* el = lc->Component();
   G4Transform3D* placementTransform = element->GetPlacementTransform();
-  G4Transform3D elCentreToStart = el->TransformToStart();
-  G4Transform3D globalToStart = elCentreToStart * (*placementTransform);
-  G4int linkID = linkRegistry->Register(el, globalToStart);
+  G4Transform3D inputToGlobal = (*placementTransform) * el->TransformToStart();
+  G4Transform3D outputToGlobal = (*placementTransform) * el->TransformToOutput();
+  G4int linkID = linkRegistry->Register(el, inputToGlobal, outputToGlobal);
   
   G4ThreeVector zOffset = G4ThreeVector(0,0,BDSGlobalConstants::Instance()->LengthSafety()+BDSSamplerPlane::ChordLength());
-  G4Transform3D samplerPosition = globalToStart * G4Transform3D(G4RotationMatrix(), globalToStart.getRotation()*zOffset);
+  G4Transform3D samplerPosition = inputToGlobal * G4Transform3D(G4RotationMatrix(), inputToGlobal.getRotation()*zOffset);
   
   if (element->GetSamplerType() == BDSSamplerType::plane && samplerWorldID >= 0)
     {

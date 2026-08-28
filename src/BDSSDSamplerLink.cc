@@ -120,7 +120,7 @@ G4bool BDSSDSamplerLink::ProcessHits(G4Step* aStep, G4TouchableHistory* /*readOu
   if (registry)
     {
       noRotation          = registry->NoRotation(samplerID);
-      globalToLocal       = registry->TransformInverse(samplerID);
+      globalToLocal       = registry->GlobalToOutput(samplerID);
       globalToLocalOffset = globalToLocal.getTranslation();
     }
   if (noRotation)
@@ -128,29 +128,28 @@ G4bool BDSSDSamplerLink::ProcessHits(G4Step* aStep, G4TouchableHistory* /*readOu
       localPosition  = pos + globalToLocalOffset;
       localDirection = mom;
 
-      const G4double outputTrackingOffset = registry ? registry->OutputTrackingOffset(samplerID) : 0;
-      if (outputTrackingOffset > 0 && std::abs(localDirection.z()) > 0)
-        {
-          localPosition.setX(localPosition.x() - outputTrackingOffset *
-                             localDirection.x() / localDirection.z());
-          localPosition.setY(localPosition.y() - outputTrackingOffset *
-                             localDirection.y() / localDirection.z());
-          localPosition.setZ(localPosition.z() - outputTrackingOffset);
-          const G4double beta = momentum / energy;
-          if (beta > 0)
-            {T -= outputTrackingOffset / (beta * CLHEP::c_light * localDirection.z());}
-        }
     }
   else if (globalToLocal != G4Transform3D::Identity)
     {
       // The global to local transform is defined in the registry.
       // Cast 3 vector to 'point' to transform position (required to be explicit for * operator)
       localPosition = globalToLocal * (HepGeom::Point3D<G4double>)pos;
-      // Now, if the sampler is infinitely thin, the local z should be 0, but it's finite.
-      // Account for this by purposively setting local z to be 0.
-      localPosition.setZ(0.0);
       // Cast 3 vector to 3 vector to transform vector (required to be explicit for * operator)
       localDirection = globalToLocal * (HepGeom::Vector3D<G4double>)mom;
+    }
+
+  const G4double outputTrackingOffset = registry ?
+    registry->OutputTrackingOffset(samplerID) : 0;
+  if (outputTrackingOffset > 0 && std::abs(localDirection.z()) > 0)
+    {
+      localPosition.setX(localPosition.x() - outputTrackingOffset *
+                         localDirection.x() / localDirection.z());
+      localPosition.setY(localPosition.y() - outputTrackingOffset *
+                         localDirection.y() / localDirection.z());
+      localPosition.setZ(localPosition.z() - outputTrackingOffset);
+      const G4double beta = momentum / energy;
+      if (beta > 0)
+        {T -= outputTrackingOffset / (beta * CLHEP::c_light * localDirection.z());}
     }
 
   BDSParticleCoordsFull coords(localPosition.x(),

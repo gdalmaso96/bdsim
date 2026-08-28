@@ -92,7 +92,7 @@ void BDSLinkPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   BDSParticleCoordsFullGlobal cg;
   auto lr = construction->LinkRegistry();
-  const G4Transform3D tr = lr->Transform(*currentElementIndex);
+  const G4Transform3D tr = lr->InputToGlobal(*currentElementIndex);
   BDSParticleCoordsFull injectionCoords = coords;
   const G4double inputTrackingOffset = lr->InputTrackingOffset(*currentElementIndex);
   if (inputTrackingOffset > 0 && std::abs(coords.zp) > 0)

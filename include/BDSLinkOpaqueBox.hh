@@ -57,6 +57,7 @@ public:
 
   inline const G4ThreeVector& OffsetToStart()    const {return offsetToStart;}
   inline const G4Transform3D& TransformToStart() const {return transformToStart;}
+  inline const G4Transform3D& TransformToOutput() const {return transformToOutput;}
 
   /// Place the output sampler
   G4int PlaceOutputSampler();
@@ -77,6 +78,7 @@ private:
   G4double                 outputTrackingOffset;
   G4ThreeVector            offsetToStart;
   G4Transform3D            transformToStart;
+  G4Transform3D            transformToOutput;
   BDSSamplerCustom*        sampler;
 };
 

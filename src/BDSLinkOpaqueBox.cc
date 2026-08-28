@@ -162,6 +162,9 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
   G4RotationMatrix* rm2 = new G4RotationMatrix();
   offsetToStart = G4ThreeVector(0.0, 0.0, -0.5*component->GetChordLength());
   transformToStart = G4Transform3D(*rm2, offsetToStart);
+  transformToOutput = G4Transform3D(*rm2,
+                                    G4ThreeVector(0.0, 0.0,
+                                                  0.5*component->GetChordLength()));
   delete rm2;
 }
 
@@ -178,28 +181,16 @@ G4int BDSLinkOpaqueBox::PlaceOutputSampler()
   sampler = new BDSSamplerCustom(samplerName, ap);
   sampler->GetContainerLogicalVolume()->SetSensitiveDetector(BDSSDManager::Instance()->SamplerLink());
   sampler->MakeMaterialValidForUseInMassWorld();
-  auto z2 = component->GetExtent();
-  // Keep the sampler clear of the component. Hits are recorded on its downstream
-  // surface; BDSLink backtracks them by outputTrackingOffset before returning them.
-  G4ThreeVector position = G4ThreeVector(0,0,0.5*component->GetChordLength() + 2*BDSSamplerCustom::ChordLength());
-  G4RotationMatrix* rm = nullptr;
-  if (BDS::IsFinite(component->GetAngle()))
-    {
-      rm = new G4RotationMatrix();
-      rm->rotateY(0.5 * component->GetAngle()); // rotate to output face
-      RegisterRotationMatrix(rm);
-      position = G4ThreeVector(component->Sagitta(), 0, 0.5*component->GetChordLength());
-      G4ThreeVector gap = G4ThreeVector(0,0,2*BDSSamplerCustom::ChordLength());
-      position += gap.transform(*rm);
-    }
-  // if there's finite angle, we ensure (in constructor) there's no tilt
-  G4RotationMatrix* rml = rm ? new G4RotationMatrix(*rm) : new G4RotationMatrix();
-  BDSSamplerPlacementRecord info(samplerName, sampler, G4Transform3D(*rml, position));
-  delete rml;
+  // Place the sampler in the element's output frame. Hits are recorded on its
+  // downstream surface and backtracked to the nominal output plane.
+  const G4double centreOffset = outputTrackingOffset -
+                                0.5*BDSSamplerCustom::ChordLength();
+  const G4Transform3D samplerTransform = transformToOutput *
+    G4Transform3D(G4RotationMatrix(), G4ThreeVector(0, 0, centreOffset));
+  BDSSamplerPlacementRecord info(samplerName, sampler, samplerTransform);
   
   G4int samplerID = BDSSamplerRegistry::Instance()->RegisterSampler(info);
-  new G4PVPlacement(rm,
-		    position,
+  new G4PVPlacement(samplerTransform,
 		    sampler->GetContainerLogicalVolume(),
 		    samplerName + "_pv",
 		    containerLogicalVolume,
