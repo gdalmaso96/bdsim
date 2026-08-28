@@ -119,7 +119,12 @@ PYBIND11_MODULE(bdslinktrackerinterface, m) {
     .def_static("GetInstance", []() {return BDSLinkTrackerInterface::GetInstance();},
                 py::return_value_policy::reference)
     .def("Reset", &BDSLinkTrackerInterface::Reset)
-    .def("PrepareBDSParticleDefinition", &BDSLinkTrackerInterface::PrepareBDSParticleDefinition)
+    .def("PrepareBDSParticleDefinition", &BDSLinkTrackerInterface::PrepareBDSParticleDefinition,
+         py::arg("pdg"),
+         py::arg("totalEnergy"),
+         py::arg("kineticEnergy"),
+         py::arg("momentum"),
+         py::arg("ionCharge"))
     .def("GetReferenceParticleDefinition", [](BDSLinkTrackerInterface &ti) {
       return ti.GetReferenceParticleDefinition();
     }, py::return_value_policy::reference)
@@ -266,8 +271,8 @@ void TrackXSuite(BDSLinkTrackerInterface *tracker_interface,
 
             auto partDef = tracker_interface->PrepareBDSParticleDefinition(pdgid_ptr[i],
                                                                            /*totalEnergy */ 0,
+                                                                           /*kineticEnergy */ 0,
                                                                            p,
-                                                                           /* kineticEnergy */ 0,
                                                                            q);
             G4double t = - zeta_ptr[i] * CLHEP::m / (ref->Beta() * CLHEP::c_light);
 

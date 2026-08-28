@@ -36,8 +36,8 @@ public:
 
   BDSParticleDefinition* PrepareBDSParticleDefinition(int pdg,
                                                       double totalEnergy,
-                                                      double momentum,
                                                       double kineticEnergy,
+                                                      double momentum,
                                                       int ionCharge);
   BDSParticleDefinition* PrepareBDSParticleDefinition_Bjorn(int pdg,
                                                             double momentum,
