@@ -28,6 +28,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "BDSGeometryComponent.hh"
 
 class BDSAcceleratorComponent;
+class BDSBeamline;
 class BDSSamplerCustom;
 
 /**
@@ -44,7 +45,8 @@ public:
   BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponentIn,
                    BDSTiltOffset* tiltOffsetIn,
                    G4double outputSamplerRadiusIn,
-                   G4double inputTrackingOffsetIn);
+                   G4double inputTrackingOffsetIn,
+                   G4double outputTrackingOffsetIn);
   virtual ~BDSLinkOpaqueBox();
 
   /// Default constructor
@@ -58,14 +60,20 @@ public:
   inline const G4ThreeVector& OffsetToStart()    const {return offsetToStart;}
   inline const G4Transform3D& TransformToStart() const {return transformToStart;}
   inline const G4Transform3D& TransformToOutput() const {return transformToOutput;}
+  /// Add the native component reference frames to the link field-coordinate
+  /// beamline at this wrapper's world placement.
+  void AppendFieldReferenceElements(BDSBeamline*         target,
+                                    const G4Transform3D& opaqueToGlobal,
+                                    G4double&            referenceS,
+                                    G4int&               referenceIndex) const;
 
   /// Place the output sampler
   G4int PlaceOutputSampler();
   
   /// @{ Accessor
-  G4double ArcLength()   const {return component ? component->GetArcLength() : 0.0;}
-  G4double ChordLength() const {return component ? component->GetChordLength() : 0.0;}
-  G4bool   Angled()      const {return component ? BDS::IsFinite(component->GetAngle()) : false;}
+  G4double ArcLength()   const {return arcLength;}
+  G4double ChordLength() const {return chordLength;}
+  G4bool   Angled()      const {return BDS::IsFinite(angle);}
   G4String LinkName()    const {return component ? component->GetName() : "unknown";}
   G4double InputTrackingOffset() const {return inputTrackingOffset;}
   G4double OutputTrackingOffset() const {return outputTrackingOffset;}
@@ -73,12 +81,17 @@ public:
 
 private:
   BDSAcceleratorComponent* component;
+  BDSBeamline*              componentBeamline;
   G4double                 outputSamplerRadius;
   G4double                 inputTrackingOffset;
   G4double                 outputTrackingOffset;
+  G4double                 arcLength;
+  G4double                 chordLength;
+  G4double                 angle;
   G4ThreeVector            offsetToStart;
   G4Transform3D            transformToStart;
   G4Transform3D            transformToOutput;
+  G4Transform3D            nativeToOpaque;
   BDSSamplerCustom*        sampler;
 };
 

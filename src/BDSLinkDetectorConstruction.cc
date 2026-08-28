@@ -21,10 +21,12 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "BDSBeamline.hh"
 #include "BDSBeamlineElement.hh"
 #include "BDSBeamlineIntegral.hh"
+#include "BDSBeamlineSet.hh"
 #include "BDSCollimatorJaw.hh"
 #include "BDSCollimatorTipJaw.hh"
 #include "BDSComponentFactory.hh"
 #include "BDSCrystalInfo.hh"
+#include "BDSCurvilinearBuilder.hh"
 #include "BDSDebug.hh"
 #include "BDSException.hh"
 #include "BDSExtent.hh"
@@ -41,6 +43,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "BDSParallelWorldSampler.hh"
 #include "BDSParser.hh"
 #include "BDSSampler.hh"
+#include "BDSSamplerCustom.hh"
 #include "BDSSamplerInfo.hh"
 #include "BDSSamplerPlane.hh"
 #include "BDSSamplerRegistry.hh"
@@ -130,6 +133,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
 						   GMAD::ElementType::_MULT,
 						   GMAD::ElementType::_DRIFT,
 						   GMAD::ElementType::_GAP,
+						   GMAD::ElementType::_SBEND,
+						   GMAD::ElementType::_RBEND,
 						   GMAD::ElementType::_ELEMENT};
       auto search = acceptedTypes.find(eType);
       if (search == acceptedTypes.end())
@@ -151,7 +156,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
       BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
                                                         to,
                                                         encompassingRadius,
-                                                        BDSGlobalConstants::Instance()->LengthSafety());
+                                                        globalConstants->LengthSafety(),
+                                                        2.5 * BDSSamplerCustom::ChordLength());
       
       delete to; // opaqueBox doesn't own it
       opaqueBoxes.push_back(opaqueBox);
@@ -200,6 +206,35 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
       G4int linkID = PlaceOneComponent(element, name);
       nameToElementIndex[name] = linkID;
     }
+
+  // BDSIM field integrators use the curvilinear parallel world for their
+  // local reference coordinates.  Rebuild that reference from the native
+  // children inside each independently placed link wrapper.
+  BDSBeamline* fieldReferenceBeamline = new BDSBeamline();
+  G4double referenceS = 0;
+  G4int referenceIndex = 0;
+  for (const auto* wrapperElement : *linkBeamline)
+    {
+      const auto* linkComponent = dynamic_cast<const BDSLinkComponent*>(
+        wrapperElement->GetAcceleratorComponent());
+      const BDSLinkOpaqueBox* opaque = linkComponent ? linkComponent->Component() : nullptr;
+      if (opaque)
+        {
+          opaque->AppendFieldReferenceElements(fieldReferenceBeamline,
+                                               *wrapperElement->GetPlacementTransform(),
+                                               referenceS,
+                                               referenceIndex);
+        }
+    }
+
+  BDSCurvilinearBuilder curvilinearBuilder;
+  BDSBeamlineSet referenceSet;
+  referenceSet.massWorld = fieldReferenceBeamline;
+  referenceSet.curvilinearWorld =
+    curvilinearBuilder.BuildCurvilinearBeamLine1To1(fieldReferenceBeamline, false);
+  referenceSet.curvilinearBridgeWorld =
+    curvilinearBuilder.BuildCurvilinearBridgeBeamLine(referenceSet.curvilinearWorld);
+  acceleratorModel->RegisterBeamlineSetMain(referenceSet);
 
   return worldPV;
 }
@@ -352,7 +387,8 @@ G4int BDSLinkDetectorConstruction::AddLinkCollimatorJaw(const std::string& colli
   BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
                                                     to,
                                                     encompassingRadius,
-                                                    BDSGlobalConstants::Instance()->LengthSafety());
+                                                    BDSGlobalConstants::Instance()->LengthSafety(),
+                                                    2.5 * BDSSamplerCustom::ChordLength());
   
   // add to beam line
   BDSLinkComponent* comp = new BDSLinkComponent(opaqueBox->GetName(),
@@ -456,7 +492,8 @@ G4int BDSLinkDetectorConstruction::AddLinkCollimatorTipJaw(const std::string& co
     BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
                                                       to,
                                                       encompassingRadius,
-                                                      BDSGlobalConstants::Instance()->LengthSafety());
+                                                      BDSGlobalConstants::Instance()->LengthSafety(),
+                                                      2.5 * BDSSamplerCustom::ChordLength());
     
     // Add to beamline
     BDSLinkComponent* comp = new BDSLinkComponent(opaqueBox->GetName(), opaqueBox, opaqueBox->GetExtent().DZ());
@@ -509,7 +546,8 @@ G4int BDSLinkDetectorConstruction::AddLinkElement(GMAD::Element el) {
   BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
                                                     to,
                                                     encompassingRadius,
-                                                    BDSGlobalConstants::Instance()->LengthSafety());
+                                                    BDSGlobalConstants::Instance()->LengthSafety(),
+                                                    2.5 * BDSSamplerCustom::ChordLength());
 
   // Add to beamline
   BDSLinkComponent* comp = new BDSLinkComponent(opaqueBox->GetName(), opaqueBox, opaqueBox->GetExtent().DZ());
