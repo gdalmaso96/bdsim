@@ -174,6 +174,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
 						   GMAD::ElementType::_UNDULATOR,
 						   GMAD::ElementType::_GABORLENS,
 						   GMAD::ElementType::_MUONSPOILER,
+						   GMAD::ElementType::_LASERWIREOLD,
+						   GMAD::ElementType::_LASERWIRE,
 						   GMAD::ElementType::_DRIFT,
 						   GMAD::ElementType::_GAP,
 						   GMAD::ElementType::_SBEND,

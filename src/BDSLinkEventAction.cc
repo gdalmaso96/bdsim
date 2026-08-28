@@ -20,6 +20,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "BDSDebug.hh"
 #include "BDSGlobalConstants.hh"
 #include "BDSHitSamplerLink.hh"
+#include "BDSLaserCompton.hh"
 #include "BDSLinkEventAction.hh"
 #include "BDSLinkEventInfo.hh"
 #include "BDSLinkRunAction.hh"
@@ -68,6 +69,7 @@ void BDSLinkEventAction::BeginOfEventAction(const G4Event* evt)
 {
   currentEventIndex = evt->GetEventID();
   primaryAbsorbedInCollimator = false;
+  FireLaserCompton = true;
   
   // reset navigators to ensure no mis-navigating and that events are truly independent
   BDSAuxiliaryNavigator::ResetNavigatorStates();
