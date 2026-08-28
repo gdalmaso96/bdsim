@@ -1,0 +1,8 @@
+external_box: element, l=1.1*m,
+              geometry="gdml:../../examples/features/fields/maps_bdsim/abox.gdml";
+
+link_line: line = (external_box);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em";

@@ -92,6 +92,16 @@ foreach(element_name sol1 hk1)
            COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad ${element_name} field)
 endforeach()
 
+if (USE_GDML)
+  add_executable(BDSLinkExternalGeometryTester BDSLinkExternalGeometryTester.cc)
+  target_link_libraries(BDSLinkExternalGeometryTester ${BDSIM_LIB_NAME} gmad)
+  add_test(NAME "tester-link-external-geometry"
+           COMMAND BDSLinkExternalGeometryTester
+                   ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_external_geometry.gmad)
+  set_tests_properties("tester-link-external-geometry" PROPERTIES
+    ENVIRONMENT "BDSIM_DATA_DIR=${CMAKE_SOURCE_DIR}/src-external")
+endif()
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)
