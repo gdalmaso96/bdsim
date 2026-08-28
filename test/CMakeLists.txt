@@ -79,6 +79,15 @@ add_test(NAME "tester-link-curvilinear-sbend"
 add_test(NAME "tester-link-curvilinear-rbend"
          COMMAND BDSLinkCurvilinearTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_rbend.gmad)
 
+add_executable(BDSLinkComponentLineTester BDSLinkComponentLineTester.cc)
+target_link_libraries(BDSLinkComponentLineTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-component-line-rf"
+         COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad rf1 energy)
+foreach(element_name sol1 hk1)
+  add_test(NAME "tester-link-component-line-${element_name}"
+           COMMAND BDSLinkComponentLineTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_lines.gmad ${element_name} field)
+endforeach()
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)

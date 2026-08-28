@@ -1,0 +1,12 @@
+rf1: rf, l=0.5*m, gradient=2*MV/m, frequency=400*MHz,
+     aper1=5*cm;
+sol1: solenoid, l=0.5*m, B=0.2*T, aper1=5*cm;
+hk1: hkicker, l=0.5*m, hkick=1e-3, e1=0.2, e2=-0.2,
+     hgap=3*cm, fint=0.4, fintx=0.4, aper1=5*cm;
+
+link_line: line = (rf1, sol1, hk1);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em", includeFringeFields=1,
+        includeFringeFieldsCavities=1;
