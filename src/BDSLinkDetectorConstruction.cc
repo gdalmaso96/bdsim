@@ -141,7 +141,9 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
     {
       GMAD::ElementType eType = element.type;
 
-      if (eType == GMAD::ElementType::_LINE || eType == GMAD::ElementType::_REV_LINE)
+      if (eType == GMAD::ElementType::_LINE     ||
+          eType == GMAD::ElementType::_REV_LINE ||
+          eType == GMAD::ElementType::_MARKER)
         {continue;}
       
       std::set<GMAD::ElementType> acceptedTypes = {GMAD::ElementType::_ECOL,
