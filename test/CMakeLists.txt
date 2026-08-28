@@ -147,6 +147,11 @@ add_test(NAME "tester-link-laserwire"
                  ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_laser_elements.gmad
                  modernLaser transport)
 
+add_executable(BDSLinkMuonCoolerTester BDSLinkMuonCoolerTester.cc)
+target_link_libraries(BDSLinkMuonCoolerTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-muon-cooler"
+         COMMAND BDSLinkMuonCoolerTester ${CMAKE_SOURCE_DIR}/examples/features/components/muoncooler.gmad)
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)

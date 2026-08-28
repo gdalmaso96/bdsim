@@ -206,8 +206,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
           encompassingRadius = std::max(encompassingRadius,
                                         containerExtent.MaximumAbsTransverse());
         }
-      if (encompassingRadius <= 0)
-        {encompassingRadius = 0.5 * globalConstants->SamplerDiameter();}
+      encompassingRadius = std::max(encompassingRadius,
+                                    0.5 * globalConstants->SamplerDiameter());
       BDSAcceleratorComponent* inputGuard = nullptr;
       BDSAcceleratorComponent* outputGuard = nullptr;
       if (eType == GMAD::ElementType::_SBEND || eType == GMAD::ElementType::_RBEND)
