@@ -108,6 +108,27 @@ if (USE_GDML)
     ENVIRONMENT "BDSIM_DATA_DIR=${CMAKE_SOURCE_DIR}/src-external")
 endif()
 
+add_executable(BDSLinkNativeElementTester BDSLinkNativeElementTester.cc)
+target_link_libraries(BDSLinkNativeElementTester ${BDSIM_LIB_NAME} gmad)
+function(add_link_native_element_test element_name length_m outcome)
+  add_test(NAME "tester-link-native-${element_name}"
+           COMMAND BDSLinkNativeElementTester
+                   ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_remaining_native_elements.gmad
+                   ${element_name} ${length_m} ${outcome})
+endfunction()
+add_link_native_element_test(target1      0.05 transport)
+add_link_native_element_test(dump1        0.2  absorbed)
+add_link_native_element_test(shield1      0.2  transport)
+add_link_native_element_test(degrader1    0.4  transport)
+add_link_native_element_test(gascap1      0.5  transport)
+add_link_native_element_test(gasjet1      0.15 transport)
+add_link_native_element_test(screen1      0.1  transport)
+add_link_native_element_test(wire1        0.1  transport)
+add_link_native_element_test(jcoltip1     0.2  transport)
+add_link_native_element_test(undulator1   0.4  transport)
+add_link_native_element_test(gabor1       0.52 transport)
+add_link_native_element_test(muonspoiler1 1.0  transport)
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)

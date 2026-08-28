@@ -1,0 +1,42 @@
+target1: target, l=0.05*m, material="copper";
+dump1: dump, l=0.2*m, horizontalWidth=20*cm;
+shield1: shield, l=0.2*m, aper1=3*cm, aper2=3*cm,
+         apertureType="rectangular", horizontalWidth=20*cm,
+         material="concrete";
+degrader1: degrader, l=0.4*m, material="copper", numberWedges=1,
+           wedgeLength=10*cm, degraderHeight=10*cm,
+           materialThickness=1*mm;
+gascap1: gascap, l=0.5*m, aper1=5*cm,
+         apertureType="circularVacuum", horizontalWidth=10*cm,
+         xsize=3*cm, outerShape="circular",
+         layerMaterials={"G4_Si", "G4_Xe", "G4_Cu"},
+         materialThickness=1*cm;
+gasjet1: gasjet, l=0.15*m, aper1=5*cm, material="G4_AIR",
+         xdir=7*cm, ydir=7*cm, zdir=1*cm,
+         phi=0, theta=1, psi=0;
+screen1: screen, l=0.1*m, layerThicknesses={0.2*mm},
+         layerMaterials={"G4_Al"}, screenXSize=2*cm,
+         screenYSize=2*cm, angle=0, aper1=5*cm;
+wire1: wirescanner, l=0.1*m, wireDiameter=1*mm, wireLength=2*cm,
+       wireOffsetX=1*cm, wireOffsetY=1*cm, wireOffsetZ=0,
+       wireAngle=0, aper1=5*cm, apertureType="circularvacuum",
+       material="C";
+jcoltip1: jcoltip, l=0.2*m, material="G4_Cu", tipMaterial="G4_W",
+          tipThickness=5*cm, horizontalWidth=20*cm, xsize=2.5*cm;
+undulator1: undulator, l=0.4*m, B=0.2*T,
+            undulatorPeriod=0.1*m, material="carbon", aper1=5*cm;
+gabor1: gaborlens, l=0.52*m, B=1*T, material="copper",
+        horizontalWidth=30*cm, aper1=10*cm, anodeRadius=8*cm,
+        anodeLength=0.46*m, anodeThickness=1*mm,
+        electrodeRadius=5*cm, electrodeLength=3*cm,
+        electrodeThickness=1*mm;
+muonspoiler1: muonspoiler, l=1*m, aper1=5*cm,
+              outerDiameter=40*cm, B=0.5*T;
+
+link_line: line=(target1, dump1, shield1, degrader1, gascap1, gasjet1,
+                screen1, wire1, jcoltip1, undulator1, gabor1,
+                muonspoiler1);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em", includeFringeFields=1;
