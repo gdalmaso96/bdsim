@@ -131,6 +131,17 @@ add_link_native_element_test(undulator1   0.4  transport)
 add_link_native_element_test(gabor1       0.52 transport)
 add_link_native_element_test(muonspoiler1 1.0  transport)
 
+add_executable(BDSLinkLaserElementTester BDSLinkLaserElementTester.cc)
+target_link_libraries(BDSLinkLaserElementTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-laser-legacy"
+         COMMAND BDSLinkLaserElementTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_laser_elements.gmad
+                 legacyLaser legacy-compton)
+add_test(NAME "tester-link-laserwire"
+         COMMAND BDSLinkLaserElementTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_laser_elements.gmad
+                 modernLaser transport)
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)

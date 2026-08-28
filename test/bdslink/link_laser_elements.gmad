@@ -1,0 +1,13 @@
+redLaser: laserflux, wavelength=633*nm,
+          m2=1.3, pulseEnergy=13*mJ, pulseDuration=1.3*ns,
+          w0=23.5*um, sigma0=12*um;
+
+legacyLaser: laser, l=1*cm, x=1, y=0, z=0, wavelength=532*nm;
+modernLaser: laserwire, l=10*cm, aper1=4*cm,
+             wireLength=10*cm, laserBeam="redLaser";
+
+link_line: line=(legacyLaser, modernLaser);
+use, link_line;
+
+beam, particle="e-", energy=250*GeV;
+option, physicsList="lw";
