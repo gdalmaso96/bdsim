@@ -72,6 +72,13 @@ target_link_libraries(BDSLinkInputOffsetTester ${BDSIM_LIB_NAME} gmad)
 add_test(NAME "tester-link-input-offset"
          COMMAND BDSLinkInputOffsetTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_input_offset.gmad)
 
+add_executable(BDSLinkCurvilinearTester BDSLinkCurvilinearTester.cc)
+target_link_libraries(BDSLinkCurvilinearTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-curvilinear-sbend"
+         COMMAND BDSLinkCurvilinearTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_sbend.gmad)
+add_test(NAME "tester-link-curvilinear-rbend"
+         COMMAND BDSLinkCurvilinearTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_rbend.gmad)
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)

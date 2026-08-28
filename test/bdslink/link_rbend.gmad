@@ -1,0 +1,10 @@
+probe: rbend, l=5*m, angle=0.17453292519943295,
+       apertureType="rectangular", aper1=1*m, aper2=1*m,
+       outerDiameter=2.5*m;
+
+link_line: line = (probe);
+use, link_line;
+sample, range=probe;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em", ngenerate=1;
