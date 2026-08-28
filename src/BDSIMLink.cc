@@ -83,6 +83,7 @@ BDSIMLink::BDSIMLink(BDSBunch* bunchIn,
   argcCache(0),
   argvCache(nullptr),
   parser(parserIn),
+  ownsParser(parserIn == nullptr),
   bdsOutput(nullptr),
   bdsBunch(bunchIn),
   internalBdsBunch(false),
@@ -108,6 +109,7 @@ BDSIMLink::BDSIMLink(int argc, char** argv,
   argcCache(argc),
   argvCache(argv),
   parser(parserIn),
+  ownsParser(parserIn == nullptr),
   bdsOutput(nullptr),
   bdsBunch(nullptr),
   runManager(nullptr),
@@ -450,7 +452,8 @@ BDSIMLink::~BDSIMLink()
     {;} // ignore any exception as this is a destructor
   
   delete runManager;
-  delete parser;
+  if (ownsParser)
+    {delete parser;}
 
   if (argvCache) {
     for (int i = 0; i < argcCache; ++i) {
@@ -474,10 +477,12 @@ int BDSIMLink::GetLinkIndex(const std::string& elementName) const
 
 const BDSLinkComponent* BDSIMLink::GetLinkComponent(int linkID) const
 {
+  if (!construction)
+    {return nullptr;}
   const BDSBeamline* bl = construction->LinkBeamline();
   if (!bl)
     {return nullptr;}
-  if (linkID > (int)bl->size())
+  if (linkID < 0 || linkID >= (int)bl->size())
     {return nullptr;}
   const auto rawAccComponent = bl->at(linkID)->GetAcceleratorComponent();
   const auto linkComponent = dynamic_cast<const BDSLinkComponent*>(rawAccComponent);
@@ -494,9 +499,10 @@ double BDSIMLink::GetChordLengthOfLinkElement(int beamlineIndex) const
 
 double BDSIMLink::GetChordLengthOfLinkElement(const std::string& elementName)
 {
-  int linkID = GetLinkIndex(elementName);
-  int beamlineIndex = linkIDToBeamlineIndex[linkID];
-  return GetChordLengthOfLinkElement(beamlineIndex);
+  const int linkID = GetLinkIndex(elementName);
+  const auto search = linkIDToBeamlineIndex.find(linkID);
+  return search == linkIDToBeamlineIndex.end() ? -1.0 :
+         GetChordLengthOfLinkElement(search->second);
 }
 
 double BDSIMLink::GetArcLengthOfLinkElement(int beamlineIndex) const
@@ -509,9 +515,10 @@ double BDSIMLink::GetArcLengthOfLinkElement(int beamlineIndex) const
 
 double BDSIMLink::GetArcLengthOfLinkElement(const std::string& elementName)
 {
-  int linkID = GetLinkIndex(elementName);
-  int beamlineIndex = linkIDToBeamlineIndex[linkID];
-  return GetArcLengthOfLinkElement(beamlineIndex);
+  const int linkID = GetLinkIndex(elementName);
+  const auto search = linkIDToBeamlineIndex.find(linkID);
+  return search == linkIDToBeamlineIndex.end() ? -1.0 :
+         GetArcLengthOfLinkElement(search->second);
 }
 
 BDSBunch* BDSIMLink::GetBunch() const
