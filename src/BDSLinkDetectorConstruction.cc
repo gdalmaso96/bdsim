@@ -180,6 +180,7 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
 						   GMAD::ElementType::_GAP,
 						   GMAD::ElementType::_SBEND,
 						   GMAD::ElementType::_RBEND,
+						   GMAD::ElementType::_MUONCOOLER,
 						   GMAD::ElementType::_ELEMENT};
       auto search = acceptedTypes.find(eType);
       if (search == acceptedTypes.end())
