@@ -15,6 +15,11 @@ if (USE_PYTHON_BINDINGS)
            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/muon_cooler_bindings.py)
   set_tests_properties("tester-python-muon-cooler-bindings" PROPERTIES
                        ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/python")
+
+  add_test(NAME "tester-python-link-robustness"
+           COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/bdslink_robustness.py)
+  set_tests_properties("tester-python-link-robustness" PROPERTIES
+                       ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/python")
 endif()
 
 add_executable(BDSFieldTester BDSFieldTester.cc)
