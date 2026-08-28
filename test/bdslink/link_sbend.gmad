@@ -1,4 +1,5 @@
 probe: sbend, l=5*m, angle=0.17453292519943295,
+       e1=0.06981317007977318, e2=-0.05235987755982989,
        apertureType="rectangular", aper1=1*m, aper2=1*m,
        outerDiameter=2.5*m;
 

@@ -6,12 +6,14 @@ This file is part of BDSIM.
 */
 
 #include "BDSBunchSixTrackLink.hh"
+#include "BDSGlobalConstants.hh"
 #include "BDSHitSamplerLink.hh"
 #include "BDSIMLink.hh"
 #include "BDSLinkComponent.hh"
 #include "BDSLinkOpaqueBox.hh"
 #include "BDSParticleCoordsFull.hh"
 #include "BDSParticleDefinition.hh"
+#include "BDSSamplerCustom.hh"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -74,6 +76,17 @@ int main(int argc, char** argv)
       std::cerr << std::setprecision(17)
                 << "Wrong output reference rotation: " << measuredAngle
                 << ", expected " << expectedAngle << std::endl;
+      return 1;
+    }
+
+  // The pole-face geometry extends beyond the nominal reference planes. The
+  // link must track through that native envelope in addition to its usual
+  // navigation and sampler margins.
+  if (bend->InputTrackingOffset() <= BDSGlobalConstants::Instance()->LengthSafety() ||
+      bend->OutputTrackingOffset() <= 2.5 * BDSSamplerCustom::ChordLength())
+    {
+      std::cerr << "The bend tracking offsets do not enclose its native geometry"
+                << std::endl;
       return 1;
     }
 

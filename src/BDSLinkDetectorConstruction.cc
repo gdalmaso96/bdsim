@@ -70,6 +70,28 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 
 class BDSParticleDefinition;
 
+namespace
+{
+  GMAD::Element LinkGuardDefinition(const GMAD::Element& source,
+                                    const G4String&      name,
+                                    G4double             length)
+  {
+    GMAD::Element guard;
+    guard.type = GMAD::ElementType::_DRIFT;
+    guard.name = name;
+    guard.l = length / CLHEP::m;
+    guard.apertureType = source.apertureType;
+    guard.aper1 = source.aper1;
+    guard.aper2 = source.aper2;
+    guard.aper3 = source.aper3;
+    guard.aper4 = source.aper4;
+    guard.beampipeThickness = source.beampipeThickness;
+    guard.beampipeMaterial = source.beampipeMaterial;
+    guard.vacuumMaterial = source.vacuumMaterial;
+    return guard;
+  }
+}
+
 BDSLinkDetectorConstruction::BDSLinkDetectorConstruction():
   worldSolid(nullptr),
   worldPV(nullptr),
@@ -153,11 +175,35 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
       G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
       if (encompassingRadius <= 0)
         {encompassingRadius = 0.5 * globalConstants->SamplerDiameter();}
+      BDSAcceleratorComponent* inputGuard = nullptr;
+      BDSAcceleratorComponent* outputGuard = nullptr;
+      if (eType == GMAD::ElementType::_SBEND || eType == GMAD::ElementType::_RBEND)
+        {
+          const auto clearances = BDSLinkOpaqueBox::FaceClearances(component, to);
+          if (clearances.first > 0)
+            {
+              GMAD::Element guard = LinkGuardDefinition(
+                element, element.name + "_link_guard_in", clearances.first);
+              BDSBeamlineIntegral guardIntegral(*designParticle);
+              inputGuard = componentFactory->CreateComponent(
+                &guard, nullptr, &element, guardIntegral);
+            }
+          if (clearances.second > 0)
+            {
+              GMAD::Element guard = LinkGuardDefinition(
+                element, element.name + "_link_guard_out", clearances.second);
+              BDSBeamlineIntegral guardIntegral(*designParticle);
+              outputGuard = componentFactory->CreateComponent(
+                &guard, &element, nullptr, guardIntegral);
+            }
+        }
       BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
                                                         to,
                                                         encompassingRadius,
                                                         globalConstants->LengthSafety(),
-                                                        2.5 * BDSSamplerCustom::ChordLength());
+                                                        2.5 * BDSSamplerCustom::ChordLength(),
+                                                        inputGuard,
+                                                        outputGuard);
       
       delete to; // opaqueBox doesn't own it
       opaqueBoxes.push_back(opaqueBox);
