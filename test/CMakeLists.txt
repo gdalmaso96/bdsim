@@ -47,6 +47,12 @@ add_test(NAME "tester-link-sampler-parser-last"
 add_test(NAME "tester-link-sampler-legacy"
          COMMAND BDSLinkSamplerTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_sampler_empty.gmad legacy probe)
 
+add_executable(BDSLinkComponentIndexTester BDSLinkComponentIndexTester.cc)
+target_link_libraries(BDSLinkComponentIndexTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-component-indexing"
+         COMMAND BDSLinkComponentIndexTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_component_indexing.gmad)
+
 add_executable(BDSLinkFieldTester BDSLinkFieldTester.cc)
 target_link_libraries(BDSLinkFieldTester ${BDSIM_LIB_NAME} gmad)
 add_test(NAME "tester-link-field-construction"

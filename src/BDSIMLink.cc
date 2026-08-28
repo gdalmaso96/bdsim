@@ -357,6 +357,7 @@ int BDSIMLink::Initialise(double minimumKineticEnergy,
 
   const auto& nameInds = construction->NameToElementIndex();
   nameToElementIndex.insert(nameInds.begin(), nameInds.end());
+  linkIDToBeamlineIndex = construction->LinkIDToBeamlineIndex();
   
   if (bdsOutput)
     {

@@ -1,0 +1,8 @@
+short_drift: drift, l=0.2*m, aper1=5*cm;
+long_drift:  drift, l=0.7*m, aper1=5*cm;
+
+link_line: line = (short_drift, long_drift);
+use, link_line;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em";

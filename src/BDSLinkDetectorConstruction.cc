@@ -251,6 +251,7 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
   BDSFieldQuery::AttachWorldVolumeToNavigator(worldPV);
 
   // place any defined link elements in input
+  G4int beamlineIndex = 0;
   for (auto element : *linkBeamline)
     {
       BDSLinkComponent* lc = dynamic_cast<BDSLinkComponent*>(element->GetAcceleratorComponent());
@@ -259,6 +260,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
       G4String name = lc ? lc->LinkName() : samplerName;
       G4int linkID = PlaceOneComponent(element, name);
       nameToElementIndex[name] = linkID;
+      linkIDToBeamlineIndex[linkID] = beamlineIndex;
+      beamlineIndex++;
     }
 
   // BDSIM field integrators use the curvilinear parallel world for their
