@@ -44,6 +44,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "BDSSamplerType.hh"
 #include "BDSSDManager.hh"
 #include "BDSTiltOffset.hh"
+#include "BDSUtilities.hh"
 
 #include "parser/element.h"
 #include "parser/elementtype.h"
@@ -114,12 +115,31 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
 
       if (eType == GMAD::ElementType::_LINE || eType == GMAD::ElementType::_REV_LINE)
         {continue;}
+
+      if (eType == GMAD::ElementType::_ELEMENT &&
+          (BDS::NonZero(element.angle) ||
+           BDS::NonZero(element.e1)    ||
+           BDS::NonZero(element.e2)))
+        {
+          throw BDSException("BDSLink supports only straight element definitions; "
+                             "angle, e1 and e2 must be zero for element \"" +
+                             element.name + "\"");
+        }
       
       std::set<GMAD::ElementType> acceptedTypes = {GMAD::ElementType::_ECOL,
 						   GMAD::ElementType::_RCOL,
                            GMAD::ElementType::_BMCOL,
 						   GMAD::ElementType::_JCOL,
 						   GMAD::ElementType::_CRYSTALCOL,
+						   GMAD::ElementType::_QUAD,
+						   GMAD::ElementType::_SEXTUPOLE,
+						   GMAD::ElementType::_OCTUPOLE,
+						   GMAD::ElementType::_DECAPOLE,
+						   GMAD::ElementType::_MULT,
+						   GMAD::ElementType::_RFX,
+						   GMAD::ElementType::_RFY,
+						   GMAD::ElementType::_GABORLENS,
+						   GMAD::ElementType::_DRIFT,
 						   GMAD::ElementType::_ELEMENT};
       auto search = acceptedTypes.find(eType);
       if (search == acceptedTypes.end())
