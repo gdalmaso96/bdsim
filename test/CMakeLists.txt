@@ -28,6 +28,22 @@ add_test(NAME "tester-link-sampler-legacy"
 
 add_executable(BDSLinkFieldTester BDSLinkFieldTester.cc)
 target_link_libraries(BDSLinkFieldTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-field-construction"
+         COMMAND BDSLinkFieldTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_field.gmad probe)
+foreach(element_name q1 s1 o1 dc1 mul1 gabor1)
+  add_test(NAME "tester-link-field-${element_name}"
+           COMMAND BDSLinkFieldTester
+                   ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_field_elements.gmad
+                   ${element_name} field)
+endforeach()
+add_test(NAME "tester-link-field-rfx1"
+         COMMAND BDSLinkFieldTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_field_elements.gmad
+                 rfx1 field-x)
+add_test(NAME "tester-link-field-rfy1"
+         COMMAND BDSLinkFieldTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_field_elements.gmad
+                 rfy1 field-y)
 if (USE_GZSTREAM)
   add_test(NAME "tester-link-field-map"
            COMMAND BDSLinkFieldTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_field_map.gmad

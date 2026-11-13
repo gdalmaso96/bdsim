@@ -120,6 +120,14 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                            GMAD::ElementType::_BMCOL,
 						   GMAD::ElementType::_JCOL,
 						   GMAD::ElementType::_CRYSTALCOL,
+						   GMAD::ElementType::_QUAD,
+						   GMAD::ElementType::_SEXTUPOLE,
+						   GMAD::ElementType::_OCTUPOLE,
+						   GMAD::ElementType::_DECAPOLE,
+						   GMAD::ElementType::_MULT,
+						   GMAD::ElementType::_RFX,
+						   GMAD::ElementType::_RFY,
+						   GMAD::ElementType::_GABORLENS,
 						   GMAD::ElementType::_ELEMENT};
       auto search = acceptedTypes.find(eType);
       if (search == acceptedTypes.end())
