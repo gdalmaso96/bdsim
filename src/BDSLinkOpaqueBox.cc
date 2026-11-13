@@ -50,15 +50,43 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "G4TwoVector.hh"
 
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "CLHEP/Geometry/Point3D.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
+
+namespace
+{
+  G4double TrackingClearance(const BDSBeamline*   beamline,
+                             const G4Transform3D& frameToWorld,
+                             G4bool               input)
+  {
+    const G4Transform3D worldToFrame = frameToWorld.inverse();
+    G4double boundary = input ? std::numeric_limits<G4double>::max() :
+                                std::numeric_limits<G4double>::lowest();
+    for (const auto* element : *beamline)
+      {
+        const G4Transform3D* elementToWorld = element->GetPlacementTransform();
+        for (const auto& point : element->GetExtent().AllBoundaryPoints())
+          {
+            const auto pointWorld = (*elementToWorld) *
+                                    (HepGeom::Point3D<G4double>)point;
+            const auto pointFrame = worldToFrame * pointWorld;
+            boundary = input ? std::min(boundary, pointFrame.z()) :
+                               std::max(boundary, pointFrame.z());
+          }
+      }
+    return input ? std::max(0.0, -boundary) : std::max(0.0, boundary);
+  }
+}
 
 BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponentIn,
 				   BDSTiltOffset* tiltOffsetIn,
 				   G4double outputSamplerRadiusIn,
 				   G4double inputTrackingOffsetIn,
-				   G4double outputTrackingOffsetIn):
+				   G4double outputTrackingOffsetIn,
+                                   BDSAcceleratorComponent* inputGuardIn,
+                                   BDSAcceleratorComponent* outputGuardIn):
   BDSGeometryComponent(nullptr, nullptr),
   component(acceleratorComponentIn),
   componentBeamline(nullptr),
@@ -81,20 +109,28 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
   if (dynamic_cast<BDSLine*>(component))
     {
       componentBeamline = new BDSBeamline();
+      if (inputGuardIn)
+        {componentBeamline->AddComponent(inputGuardIn);}
+      const G4int nominalStartIndex = (G4int)componentBeamline->size();
       componentBeamline->AddComponent(component,
                                       new BDSTiltOffset(tiltOffsetIn->GetXOffset(),
                                                         tiltOffsetIn->GetYOffset(),
                                                         tiltOffsetIn->GetTilt()));
+      const G4int nominalEndIndex = (G4int)componentBeamline->size() - 1;
+      if (outputGuardIn)
+        {componentBeamline->AddComponent(outputGuardIn);}
       if (componentBeamline->size() == 0)
         {throw BDSException(__METHOD_NAME__, "empty internal link beamline");}
 
-      const BDSBeamlineElement* nominalFirst = componentBeamline->GetFirstItem();
-      const BDSBeamlineElement* nominalLast  = componentBeamline->GetLastItem();
+      const BDSBeamlineElement* trackingLast  = componentBeamline->GetLastItem();
+      const BDSBeamlineElement* nominalFirst = componentBeamline->at(nominalStartIndex);
+      const BDSBeamlineElement* nominalLast  = componentBeamline->at(nominalEndIndex);
       arcLength = 0;
       chordLength = 0;
       angle = 0;
-      for (const auto* nominal : *componentBeamline)
+      for (G4int i = nominalStartIndex; i <= nominalEndIndex; ++i)
         {
+          const BDSBeamlineElement* nominal = componentBeamline->at(i);
           arcLength += nominal->GetArcLength();
           chordLength += nominal->GetChordLength();
           angle += nominal->GetAngle();
@@ -103,6 +139,15 @@ BDSLinkOpaqueBox::BDSLinkOpaqueBox(BDSAcceleratorComponent* acceleratorComponent
                                       nominalFirst->GetReferencePositionStart());
       transformToOutput = G4Transform3D(*nominalLast->GetReferenceRotationEnd(),
                                        nominalLast->GetReferencePositionEnd());
+      const G4Transform3D trackingOutput(
+        *trackingLast->GetReferenceRotationEnd(),
+        trackingLast->GetReferencePositionEnd());
+      const G4double outputGuardDistance =
+        (transformToOutput.inverse() * trackingOutput).getTranslation().z();
+      // Match ordinary BDSIM injection at the nominal reference entrance.
+      // The input guard encloses an angled face, but starting at the guard's
+      // upstream end would add an x-dependent path before the nominal plane.
+      outputTrackingOffset += std::max(0.0, outputGuardDistance);
 
       const BDSExtentGlobal extentGlobal = componentBeamline->GetExtentGlobal();
       extent = BDSExtent(extentGlobal.XNegGlobal(), extentGlobal.XPosGlobal(),
@@ -244,6 +289,28 @@ BDSLinkOpaqueBox::~BDSLinkOpaqueBox()
 {
   delete sampler;
   delete componentBeamline;
+}
+
+std::pair<G4double, G4double> BDSLinkOpaqueBox::FaceClearances(
+  BDSAcceleratorComponent* componentIn,
+  const BDSTiltOffset*     tiltOffsetIn)
+{
+  BDSBeamline probe;
+  probe.AddComponent(componentIn,
+                     new BDSTiltOffset(tiltOffsetIn->GetXOffset(),
+                                       tiltOffsetIn->GetYOffset(),
+                                       tiltOffsetIn->GetTilt()));
+  if (probe.empty())
+    {return {0, 0};}
+
+  const BDSBeamlineElement* first = probe.GetFirstItem();
+  const BDSBeamlineElement* last  = probe.GetLastItem();
+  const G4Transform3D inputFrame(*first->GetReferenceRotationStart(),
+                                 first->GetReferencePositionStart());
+  const G4Transform3D outputFrame(*last->GetReferenceRotationEnd(),
+                                  last->GetReferencePositionEnd());
+  return {TrackingClearance(&probe, inputFrame, true),
+          TrackingClearance(&probe, outputFrame, false)};
 }
 
 void BDSLinkOpaqueBox::AppendFieldReferenceElements(

@@ -26,6 +26,8 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "BDSGeometryComponent.hh"
 
+#include <utility>
+
 class BDSAcceleratorComponent;
 class BDSBeamline;
 class BDSSamplerCustom;
@@ -45,7 +47,9 @@ public:
                    BDSTiltOffset* tiltOffsetIn,
                    G4double outputSamplerRadiusIn,
                    G4double inputTrackingOffsetIn,
-                   G4double outputTrackingOffsetIn);
+                   G4double outputTrackingOffsetIn,
+                   BDSAcceleratorComponent* inputGuardIn = nullptr,
+                   BDSAcceleratorComponent* outputGuardIn = nullptr);
   virtual ~BDSLinkOpaqueBox();
 
   /// Default constructor
@@ -65,6 +69,12 @@ public:
                                     const G4Transform3D& opaqueToGlobal,
                                     G4double&            referenceS,
                                     G4int&               referenceIndex) const;
+
+  /// Clearance required for the native geometry on either side of its
+  /// nominal input and output reference planes.
+  static std::pair<G4double, G4double> FaceClearances(
+    BDSAcceleratorComponent* component,
+    const BDSTiltOffset*     tiltOffset);
 
   /// Place the output sampler
   G4int PlaceOutputSampler();
