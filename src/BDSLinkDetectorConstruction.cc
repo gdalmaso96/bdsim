@@ -137,7 +137,12 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                                             element.tilt * CLHEP::rad);
       auto extentTiltOffset = component->GetExtent().TiltOffset(to);
       G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
-      BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component, to, encompassingRadius);
+      if (encompassingRadius <= 0)
+        {encompassingRadius = 0.5 * globalConstants->SamplerDiameter();}
+      BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
+                                                        to,
+                                                        encompassingRadius,
+                                                        BDSGlobalConstants::Instance()->LengthSafety());
       
       delete to; // opaqueBox doesn't own it
       opaqueBoxes.push_back(opaqueBox);
@@ -335,7 +340,10 @@ G4int BDSLinkDetectorConstruction::AddLinkCollimatorJaw(const std::string& colli
                                         el.tilt * CLHEP::rad);
   auto extentTiltOffset = component->GetExtent().TiltOffset(to);
   G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
-  BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component, to, encompassingRadius);
+  BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
+                                                    to,
+                                                    encompassingRadius,
+                                                    BDSGlobalConstants::Instance()->LengthSafety());
   
   // add to beam line
   BDSLinkComponent* comp = new BDSLinkComponent(opaqueBox->GetName(),
@@ -436,7 +444,10 @@ G4int BDSLinkDetectorConstruction::AddLinkCollimatorTipJaw(const std::string& co
     BDSTiltOffset* to = new BDSTiltOffset(el.offsetX * CLHEP::m, el.offsetY * CLHEP::m, el.tilt * CLHEP::rad);
     auto extentTiltOffset = component->GetExtent().TiltOffset(to);
     G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
-    BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component, to, encompassingRadius);
+    BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
+                                                      to,
+                                                      encompassingRadius,
+                                                      BDSGlobalConstants::Instance()->LengthSafety());
     
     // Add to beamline
     BDSLinkComponent* comp = new BDSLinkComponent(opaqueBox->GetName(), opaqueBox, opaqueBox->GetExtent().DZ());
@@ -486,7 +497,10 @@ G4int BDSLinkDetectorConstruction::AddLinkElement(GMAD::Element el) {
   BDSTiltOffset* to = new BDSTiltOffset(el.offsetX * CLHEP::m, el.offsetY * CLHEP::m, el.tilt * CLHEP::rad);
   auto extentTiltOffset = component->GetExtent().TiltOffset(to);
   G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
-  BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component, to, encompassingRadius);
+  BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component,
+                                                    to,
+                                                    encompassingRadius,
+                                                    BDSGlobalConstants::Instance()->LengthSafety());
 
   // Add to beamline
   BDSLinkComponent* comp = new BDSLinkComponent(opaqueBox->GetName(), opaqueBox, opaqueBox->GetExtent().DZ());
