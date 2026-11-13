@@ -1,0 +1,21 @@
+probe_first: sbend, l=5*m, angle=0.17453292519943295,
+             e1=0.06981317007977318, e2=-0.05235987755982989,
+             apertureType="rectangular", aper1=1*m, aper2=1*m,
+             outerDiameter=2.5*m;
+probe_middle: sbend, l=5*m, angle=0.17453292519943295,
+              e1=0.06981317007977318, e2=-0.05235987755982989,
+              apertureType="rectangular", aper1=1*m, aper2=1*m,
+              outerDiameter=2.5*m;
+probe_last: sbend, l=5*m, angle=0.17453292519943295,
+            e1=0.06981317007977318, e2=-0.05235987755982989,
+            apertureType="rectangular", aper1=1*m, aper2=1*m,
+            outerDiameter=2.5*m;
+
+link_line: line = (probe_first, probe_middle, probe_last);
+use, link_line;
+sample, range=probe_first;
+sample, range=probe_middle;
+sample, range=probe_last;
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em", ngenerate=1;

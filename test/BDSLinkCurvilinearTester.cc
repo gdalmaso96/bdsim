@@ -29,11 +29,14 @@ This file is part of BDSIM.
 
 int main(int argc, char** argv)
 {
-  if (argc != 2)
+  if (argc < 2 || argc > 3)
     {
-      std::cerr << "Expected the link bend GMAD file" << std::endl;
+      std::cerr << "Expected the link bend GMAD file and optional element name"
+                << std::endl;
       return 1;
     }
+
+  const G4String elementName = argc == 3 ? argv[2] : "probe";
 
   BDSBunchSixTrackLink bunch;
   BDSIMLink link(&bunch);
@@ -55,7 +58,7 @@ int main(int argc, char** argv)
       return 1;
     }
 
-  const G4int samplerID = link.GetLinkIndex("probe");
+  const G4int samplerID = link.GetLinkIndex(elementName);
   const BDSLinkComponent* linkComponent = link.GetLinkComponent(samplerID);
   const BDSLinkOpaqueBox* bend = linkComponent ? linkComponent->Component() : nullptr;
   if (!bend || !bend->Angled())
@@ -111,7 +114,7 @@ int main(int argc, char** argv)
                                     1);
   bunch.AddParticle(particle, coordinates, 17, 17);
 
-  link.SelectLinkElement("probe");
+  link.SelectLinkElement(elementName);
   link.BeamOn(1);
 
   const BDSHitsCollectionSamplerLink* hits = link.SamplerHits();

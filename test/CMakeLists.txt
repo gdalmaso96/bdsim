@@ -42,6 +42,10 @@ add_test(NAME "tester-link-curvilinear-sbend"
          COMMAND BDSLinkCurvilinearTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_sbend.gmad)
 add_test(NAME "tester-link-curvilinear-rbend"
          COMMAND BDSLinkCurvilinearTester ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_rbend.gmad)
+add_test(NAME "tester-link-curvilinear-multiple"
+         COMMAND BDSLinkCurvilinearTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_multiple_bends.gmad
+                 probe_middle)
 
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
