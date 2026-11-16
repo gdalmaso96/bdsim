@@ -271,6 +271,12 @@ writing is broken and the CMake option :code:`USE_SIXTRACKLINK=ON` should be use
   :math:`x,y`.
   Generic :code:`element` definitions must have zero :code:`angle`, :code:`e1`, and
   :code:`e2`; non-zero values are rejected until curved link components are supported.
+  Parser-defined placements are constructed inside the opaque box of their required
+  :code:`referenceElement`. Straight gaps may be used as empty reference elements for
+  placement geometry. From Python, an element used only by a placement must first be
+  registered with :code:`BDSParser.AddElementDefinition`, before calling
+  :code:`Add_Placement` and initialising BDSLink. Global placements and sequence
+  placements are not supported.
   Component lines, curved elements, maps that depend on local :math:`z`, and fields
   on elements added after initialisation with :code:`AddLinkElement` are not
   supported.

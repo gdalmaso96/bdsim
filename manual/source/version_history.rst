@@ -22,6 +22,10 @@ New Features
   components defined before initialisation, including drifts, straight
   multipoles, transverse RF elements, Gabor lenses, and fields independent of local
   longitudinal position.
+* Parser-defined placements with a :code:`referenceElement` can be constructed inside
+  that element's BDSLink opaque box. A straight gap can provide an otherwise empty
+  region for placement geometry. Element definitions used by placements can be
+  registered through the Python parser bindings.
 
 
 v1.8.2 - 2026 / 11 / 12
