@@ -65,6 +65,21 @@ foreach(parameter angle e1 e2)
                    ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_element_${parameter}.gmad)
 endforeach()
 
+add_executable(BDSLinkPlacementTester BDSLinkPlacementTester.cc)
+target_link_libraries(BDSLinkPlacementTester ${BDSIM_LIB_NAME} gmad)
+add_test(NAME "tester-link-placement-reference-element"
+         COMMAND BDSLinkPlacementTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_placement.gmad
+                 gap1 p1_pv 0.01 0.02)
+add_test(NAME "tester-link-placement-straight-reference-element"
+         COMMAND BDSLinkPlacementTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_placement.gmad
+                 d1 p2_pv)
+add_test(NAME "tester-link-placement-field"
+         COMMAND BDSLinkFieldTester
+                 ${CMAKE_CURRENT_SOURCE_DIR}/bdslink/link_placement_field.gmad
+                 gap_field field)
+
 add_executable(BDSSixTrackTester BDSSixTrackTester.cc)
 set_target_properties(BDSSixTrackTester PROPERTIES OUTPUT_NAME "BDSSixTrackTester" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSSixTrackTester ${BDSIM_LIB_NAME} gmad)

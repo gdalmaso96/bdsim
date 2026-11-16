@@ -1,0 +1,13 @@
+placed_quadrupole: quadrupole, l=0.2*m, k1=0.5,
+                    apertureType="circular", aper1=5*cm,
+                    outerDiameter=15*cm;
+
+gap_field: gap, l=0.5*m;
+link_line: line = (gap_field);
+use, link_line;
+
+field_placement: placement, bdsimElement="placed_quadrupole",
+                 referenceElement="gap_field";
+
+beam, particle="proton", kineticEnergy=100*GeV;
+option, physicsList="em";
