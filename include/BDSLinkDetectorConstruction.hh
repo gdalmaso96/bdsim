@@ -27,6 +27,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <map>
 #include <string>
+#include <vector>
 
 class BDSBeamlineElement;
 class BDSBeamlineIntegral;
@@ -36,6 +37,11 @@ class BDSParticleDefinition;
 class G4Box;
 class G4ChannelingOptrMultiParticleChangeCrossSection;
 class G4VPhysicalVolume;
+
+namespace GMAD
+{
+  class Placement;
+}
 
 #include "parser/element.h"
 #include "parser/elementtype.h"
@@ -110,6 +116,7 @@ public:
   inline G4int NumberOfElements() const {return linkBeamline ? (G4int)linkBeamline->size() : 0;}
   inline void SetSamplerWorldID(G4int samplerWorldIDIn) {samplerWorldID = samplerWorldIDIn;}
   inline const BDSBeamline* LinkBeamline() const {return linkBeamline;}
+  inline G4bool BuildPlacementFieldsWorld() const {return buildPlacementFieldsWorld;}
 
  private:
   /// Create the worldSolid if it doesn't exist and if not expand it to the extent of the
@@ -118,6 +125,10 @@ public:
 
   /// Place a beam line element in the world.
   G4int PlaceOneComponent(const BDSBeamlineElement* element, const G4String& originalName);
+
+  /// Place parser-defined geometry inside the opaque box of its reference element.
+  void PlacePlacements(const BDSBeamline* placementBeamline,
+                       const std::vector<GMAD::Placement>& placements);
 
   G4Box* worldSolid;
   G4VPhysicalVolume* worldPV;
@@ -137,6 +148,9 @@ public:
   G4int samplerWorldID;
   
   BDSBeamlineIntegral* integral;
+
+  G4bool buildPlacementFieldsWorld;
+  std::map<const BDSBeamlineElement*, G4VPhysicalVolume*> linkElementPVs;
 
   std::map<std::string, G4int> nameToElementIndex; ///< Build up a copy here too.
   std::map<G4int, G4int> linkIDToBeamlineIndex;    ///< Special linkID to linkBeamline index

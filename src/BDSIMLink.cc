@@ -198,7 +198,8 @@ int BDSIMLink::Initialise(double minimumKineticEnergy,
   construction = new BDSLinkDetectorConstruction();
 
   /// Here the geometry isn't actually constructed - this is called by the runManager->Initialize()
-  auto parallelWorldsRequiringPhysics = BDS::ConstructAndRegisterParallelWorlds(construction, true, false);
+  auto parallelWorldsRequiringPhysics = BDS::ConstructAndRegisterParallelWorlds(
+    construction, true, construction->BuildPlacementFieldsWorld());
 
   runManager->SetUserInitialization(construction);
 

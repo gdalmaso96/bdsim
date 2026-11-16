@@ -20,6 +20,7 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 #include "BDSBeamline.hh"
 #include "BDSBeamlineElement.hh"
 #include "BDSBeamlineIntegral.hh"
+#include "BDSBeamlinePlacementBuilder.hh"
 #include "BDSComponentFactory.hh"
 #include "BDSCrystalInfo.hh"
 #include "BDSDebug.hh"
@@ -48,7 +49,9 @@ along with BDSIM.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "parser/element.h"
 #include "parser/elementtype.h"
+#include "parser/placement.h"
 
+#include "G4AssemblyVolume.hh"
 #include "G4Box.hh"
 #include "G4PVPlacement.hh"
 #include "G4String.hh"
@@ -76,10 +79,17 @@ BDSLinkDetectorConstruction::BDSLinkDetectorConstruction():
   crystalBiasing(nullptr),
 #endif
   samplerWorldID(-1),
-  integral(nullptr)
+  integral(nullptr),
+  buildPlacementFieldsWorld(false)
 {
   linkRegistry = new BDSLinkRegistry();
   BDSSDManager::Instance()->SetLinkRegistry(linkRegistry);
+
+  for (const auto& placement : BDSParser::Instance()->GetPlacements())
+    {
+      if (!placement.fieldAll.empty() || !placement.bdsimElement.empty())
+        {buildPlacementFieldsWorld = true;}
+    }
 }
 
 BDSLinkDetectorConstruction::~BDSLinkDetectorConstruction()
@@ -98,6 +108,21 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
 
   auto componentFactory = std::unique_ptr<BDSComponentFactory>(new BDSComponentFactory(nullptr, false));
   auto beamline = BDSParser::Instance()->GetBeamline();
+  const auto& placements = BDSParser::Instance()->GetPlacements();
+
+  std::set<std::string> placementReferenceElements;
+  for (const auto& placement : placements)
+    {
+      if (!placement.sequence.empty())
+        {throw BDSException(__METHOD_NAME__, "sequence placements are not supported by BDSLink");}
+      if (placement.referenceElement.empty())
+        {
+          throw BDSException(__METHOD_NAME__,
+                             "placement \"" + placement.name +
+                             "\" must specify referenceElement for use with BDSLink");
+        }
+      placementReferenceElements.insert(placement.referenceElement);
+    }
 
   std::vector<BDSLinkOpaqueBox*> opaqueBoxes = {};
   linkBeamline = new BDSBeamline();
@@ -125,6 +150,12 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                              "angle, e1 and e2 must be zero for element \"" +
                              element.name + "\"");
         }
+
+      if (eType == GMAD::ElementType::_GAP && BDS::NonZero(element.angle))
+        {
+          throw BDSException("BDSLink supports only straight gap definitions; "
+                             "angle must be zero for gap \"" + element.name + "\"");
+        }
       
       std::set<GMAD::ElementType> acceptedTypes = {GMAD::ElementType::_ECOL,
 						   GMAD::ElementType::_RCOL,
@@ -140,6 +171,7 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
 						   GMAD::ElementType::_RFY,
 						   GMAD::ElementType::_GABORLENS,
 						   GMAD::ElementType::_DRIFT,
+						   GMAD::ElementType::_GAP,
 						   GMAD::ElementType::_ELEMENT};
       auto search = acceptedTypes.find(eType);
       if (search == acceptedTypes.end())
@@ -156,6 +188,11 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
                                             element.tilt * CLHEP::rad);
       auto extentTiltOffset = component->GetExtent().TiltOffset(to);
       G4double encompassingRadius = extentTiltOffset.TransverseBoundingRadius();
+      if (placementReferenceElements.find(element.name) != placementReferenceElements.end())
+        {
+          encompassingRadius = std::max(encompassingRadius,
+                                        0.5 * globalConstants->SamplerDiameter());
+        }
       BDSLinkOpaqueBox* opaqueBox = new BDSLinkOpaqueBox(component, to, encompassingRadius);
       
       delete to; // opaqueBox doesn't own it
@@ -168,6 +205,12 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
       nameToElementIndex[element.name] = (G4int)linkBeamline->size();
       linkBeamline->AddComponent(comp);
     }
+
+  BDSBeamline* placementBeamline = BDS::BuildPlacementGeometry(placements,
+                                                               linkBeamline,
+                                                               componentFactory.get(),
+                                                               designParticle);
+  acceleratorModel->RegisterPlacementBeamline(placementBeamline);
 
   // update world extents and world solid
   UpdateWorldSolid();
@@ -204,6 +247,8 @@ G4VPhysicalVolume* BDSLinkDetectorConstruction::Construct()
       G4int linkID = PlaceOneComponent(element, name);
       nameToElementIndex[name] = linkID;
     }
+
+  PlacePlacements(placementBeamline, placements);
 
   return worldPV;
 }
@@ -554,6 +599,8 @@ G4int BDSLinkDetectorConstruction::PlaceOneComponent(const BDSBeamlineElement* e
   G4String placementName = element->GetPlacementName() + "_pv";
   G4int copyNumber = element->GetCopyNo();
   std::set<G4VPhysicalVolume*> pvs = element->PlaceElement(placementName, worldPV, false, copyNumber, true);
+  if (!pvs.empty())
+    {linkElementPVs[element] = *pvs.begin();}
 
   auto lc = dynamic_cast<BDSLinkComponent*>(element->GetAcceleratorComponent());
   if (!lc)
@@ -590,6 +637,72 @@ G4int BDSLinkDetectorConstruction::PlaceOneComponent(const BDSBeamlineElement* e
 			false);
     }
   return linkID;
+}
+
+void BDSLinkDetectorConstruction::PlacePlacements(
+  const BDSBeamline* placementBeamline,
+  const std::vector<GMAD::Placement>& placements)
+{
+  if (!placementBeamline)
+    {return;}
+
+  auto placementElement = placementBeamline->begin();
+  for (const auto& placement : placements)
+    {
+      if (placementElement == placementBeamline->end())
+        {throw BDSException(__METHOD_NAME__, "placement beam line is incomplete");}
+
+      const BDSBeamlineElement* referenceElement =
+        linkBeamline->GetElement(placement.referenceElement,
+                                 placement.referenceElementNumber);
+      if (!referenceElement)
+        {
+          throw BDSException(__METHOD_NAME__,
+                             "no link element named \"" + placement.referenceElement +
+                             "\" for placement \"" + placement.name + "\"");
+        }
+
+      auto motherSearch = linkElementPVs.find(referenceElement);
+      if (motherSearch == linkElementPVs.end())
+        {
+          throw BDSException(__METHOD_NAME__,
+                             "no opaque box for placement reference element \"" +
+                             placement.referenceElement + "\"");
+        }
+
+      const BDSBeamlineElement* placementElementPointer = *placementElement;
+      BDSAcceleratorComponent* component =
+        placementElementPointer->GetAcceleratorComponent();
+      component->AttachSensitiveDetectors();
+
+      const G4Transform3D globalTransform =
+        *(placementElementPointer->GetPlacementTransform());
+      const G4Transform3D referenceTransform =
+        *(referenceElement->GetPlacementTransform());
+      G4Transform3D localTransform = referenceTransform.inverse() * globalTransform;
+
+      G4VPhysicalVolume* motherPV = motherSearch->second;
+      G4String placementName = placement.name + "_pv";
+      if (component->ContainerIsAssembly())
+        {
+          component->GetContainerAssemblyVolume()->MakeImprint(
+            motherPV->GetLogicalVolume(), localTransform, 0, true);
+        }
+      else
+        {
+          new G4PVPlacement(localTransform,
+                            placementName,
+                            component->GetContainerLogicalVolume(),
+                            motherPV,
+                            false,
+                            0,
+                            true);
+        }
+      ++placementElement;
+    }
+
+  if (placementElement != placementBeamline->end())
+    {throw BDSException(__METHOD_NAME__, "placement beam line has unexpected elements");}
 }
 
 void BDSLinkDetectorConstruction::BuildPhysicsBias()
