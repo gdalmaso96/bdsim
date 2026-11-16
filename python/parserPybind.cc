@@ -68,6 +68,7 @@ PYBIND11_MODULE(parser, m) {
       .def("add_sampler",[](GMAD::Parser &parser, const std::string& name, int count, GMAD::ElementType type, std::string samplerType) {
         parser.add_sampler(name, count, type, samplerType);
       })
+      .def("AddElementDefinition", &GMAD::Parser::AddElementDefinition)
       .def("Add_Aperture",[](GMAD::Parser *parser) {parser->Add<GMAD::Aperture, GMAD::FastList<GMAD::Aperture>>();})
       .def("Add_Atom",[](GMAD::Parser *parser) {parser->Add<GMAD::Atom, GMAD::FastList<GMAD::Atom>>();})
       .def("Add_BLMPlacement",[](GMAD::Parser *parser) {parser->Add<GMAD::BLMPlacement, GMAD::FastList<GMAD::BLMPlacement>>();})
@@ -80,7 +81,9 @@ PYBIND11_MODULE(parser, m) {
       .def("Add_Modulator",[](GMAD::Parser *parser) {parser->Add<GMAD::Modulator, GMAD::FastList<GMAD::Modulator>>();})
       .def("Add_NewColour",[](GMAD::Parser *parser) {parser->Add<GMAD::NewColour, GMAD::FastList<GMAD::NewColour>>();})
       .def("Add_PhysicsBiasing",[](GMAD::Parser *parser) {parser->Add<GMAD::PhysicsBiasing, GMAD::FastList<GMAD::PhysicsBiasing>>();})
-      .def("Add_Placement",[](GMAD::Parser *parser) {parser->Add<GMAD::Placement, GMAD::FastList<GMAD::Placement>>();})
+      .def("Add_Placement",[](GMAD::Parser *parser) {
+        parser->Add<GMAD::Placement, GMAD::FastList<GMAD::Placement>>(false, "placement");
+      })
       .def("Add_Query",[](GMAD::Parser *parser) {parser->Add<GMAD::Query, GMAD::FastList<GMAD::Query>>();})
       .def("Add_Region",[](GMAD::Parser *parser) {parser->Add<GMAD::Region, GMAD::FastList<GMAD::Region>>();})
       .def("Add_SamplerPlacement",[](GMAD::Parser *parser) {parser->Add<GMAD::SamplerPlacement, GMAD::FastList<GMAD::SamplerPlacement>>();})

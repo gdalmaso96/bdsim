@@ -720,6 +720,12 @@ const Element& Parser::find_element(const std::string& element_name)const
   return (*search);
 }
 
+void Parser::AddElementDefinition(const Element& element)
+{
+  (*call_sequence_log) << "Parser::AddElementDefinition(element=" << element.name << ")" << std::endl;
+  element_list.push_back(element, true);
+}
+
 const Element* Parser::find_placement_element_safe(const std::string& element_name) const
 {
   (*call_sequence_log) << "Parser::find_placement_element_safe(element_name=" << element_name << ")" << std::endl;

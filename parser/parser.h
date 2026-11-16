@@ -157,6 +157,8 @@ namespace GMAD
     const Element& find_element(const std::string& element_name) const;
     /// find element by pointer - nullptr if not found - searches element_list
     const Element* find_element_safe(const std::string& element_name) const;
+    /// Add an element definition for later use, for example by a placement.
+    void AddElementDefinition(const Element& element);
     /// search placement_element
     const Element* find_placement_element_safe(const std::string& element_name) const;
     /// access property of Element with element_name
