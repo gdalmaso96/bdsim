@@ -1,5 +1,15 @@
 message(STATUS "Building test programs")
 
+if (USE_PYTHON_BINDINGS)
+  add_test(NAME "tester-python-link-parser-persistency-tracker"
+           COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/bdslink_parser_persistency.py tracker)
+  add_test(NAME "tester-python-link-parser-persistency-direct"
+           COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python/bdslink_parser_persistency.py direct)
+  set_tests_properties("tester-python-link-parser-persistency-tracker"
+                       "tester-python-link-parser-persistency-direct" PROPERTIES
+                       ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/python")
+endif()
+
 add_executable(BDSFieldTester BDSFieldTester.cc)
 set_target_properties(BDSFieldTester PROPERTIES OUTPUT_NAME "BDSFieldTest" VERSION ${BDSIM_VERSION})
 target_link_libraries(BDSFieldTester ${BDSIM_LIB_NAME} ${GMAD_LIB_NAME})
