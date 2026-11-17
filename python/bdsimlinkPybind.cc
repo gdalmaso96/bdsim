@@ -35,7 +35,10 @@ PYBIND11_MODULE(bdsimlink, m) {
   py::class_<BDSIMLink>(m, "BDSIMLink")
       .def(py::init([](BDSBunch *bunch, BDSParser *parser) {
         return new BDSIMLink(bunch, parser);
-      }), pybind11::arg("bunch") = nullptr, pybind11::arg("parser") = nullptr)
+      }),
+      pybind11::arg("bunch") = nullptr,
+      pybind11::arg("parser") = nullptr,
+      py::keep_alive<1, 3>())
       .def("Initialise",[](BDSIMLink *link,
                            py::list py_argv,
                            bool usualPrintOut,

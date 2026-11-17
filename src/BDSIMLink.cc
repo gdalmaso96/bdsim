@@ -82,6 +82,7 @@ BDSIMLink::BDSIMLink(BDSBunch* bunchIn,
   argcCache(0),
   argvCache(nullptr),
   parser(parserIn),
+  parserIsExternal(parserIn != nullptr),
   bdsOutput(nullptr),
   bdsBunch(bunchIn),
   internalBdsBunch(false),
@@ -107,6 +108,7 @@ BDSIMLink::BDSIMLink(int argc, char** argv,
   argcCache(argc),
   argvCache(argv),
   parser(parserIn),
+  parserIsExternal(parserIn != nullptr),
   bdsOutput(nullptr),
   bdsBunch(nullptr),
   runManager(nullptr),
@@ -448,7 +450,8 @@ BDSIMLink::~BDSIMLink()
     {;} // ignore any exception as this is a destructor
   
   delete runManager;
-  delete parser;
+  if (!parserIsExternal)
+    {delete parser;}
 
   if (argvCache) {
     for (int i = 0; i < argcCache; ++i) {

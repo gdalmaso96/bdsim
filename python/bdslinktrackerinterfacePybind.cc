@@ -113,7 +113,8 @@ PYBIND11_MODULE(bdslinktrackerinterface, m) {
        py::arg("referenceIonCharge") = 1,
        py::arg("batchMode") = true,
        py::arg("no_neutral_particles") = true,
-       py::return_value_policy::reference)
+       py::return_value_policy::reference,
+       py::keep_alive<0, 1>())
 
     .def_static("GetInstance", []() {return BDSLinkTrackerInterface::GetInstance();},
                 py::return_value_policy::reference)
